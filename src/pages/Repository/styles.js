@@ -114,3 +114,5 @@ export const List = styled.ul`
     }
   }
 `;
+
+export const Loading = styled.div``;

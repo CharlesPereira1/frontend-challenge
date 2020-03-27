@@ -6,7 +6,7 @@ import { useRouteMatch, Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 
 import Container from '~/components/Container';
-import api from '~/service/api';
+import api from '~/services/api';
 import { colors } from '~/styles/colors';
 
 import { Loading, List } from './styles';
