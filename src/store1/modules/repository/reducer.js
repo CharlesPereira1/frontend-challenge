@@ -4,9 +4,10 @@ const INITIAL_STATE = {
   repos: {
     filter: 'star',
     page: 1,
-    perPage: 10,
     data: [],
+    perPage: 10,
   },
+
   // repository: {},
   loading: false,
 };
@@ -31,6 +32,7 @@ export default function repo(state = INITIAL_STATE, action) {
         draft.loading = false;
         break;
       }
+
       default:
         return state;
     }

@@ -25,6 +25,10 @@ export default function Repository() {
   const repository = useSelector(state => state.repository.repos);
   const loading = useSelector(state => state.repository.loading);
 
+  const [stars, setStars] = useState(0);
+  const [forks, setForks] = useState(0);
+  const [issues, setIssues] = useState(0);
+
   // console.log(newRepo);
   // console.log(loading);
   // console.log(repository);
