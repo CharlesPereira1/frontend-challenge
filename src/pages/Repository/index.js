@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaGithubAlt, FaSpinner, FaSearch } from 'react-icons/fa';
+import { FaGithubAlt } from 'react-icons/fa';
 import { FiGitPullRequest } from 'react-icons/fi';
 import { GoRepoForked, GoStar } from 'react-icons/go';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-
-import { debounce } from 'lodash';
 
 import Container from '~/components/Container';
 import InputSearch from '~/components/InputSearch';
@@ -18,77 +16,92 @@ import { colors } from '~/styles/colors';
 import { Form, SubmitButton, List } from './styles';
 
 export default function Repository() {
-  // const [repositories, setRepositories] = useState([]);
   const [newRepo, setNewRepo] = useState('');
+  const [newFilter, setNewFilter] = useState('');
 
   const dispatch = useDispatch();
-  const repository = useSelector(state => state.repository.repos);
+  const repositories = useSelector(state => state.repository.repos);
   const loading = useSelector(state => state.repository.loading);
-
-  const [stars, setStars] = useState(0);
-  const [forks, setForks] = useState(0);
-  const [issues, setIssues] = useState(0);
-
-  // console.log(newRepo);
-  // console.log(loading);
-  // console.log(repository);
-  // console.log(loading);
+  const filters = useSelector(state => state.repository.repos.nameSearch);
 
   useEffect(() => {
-    dispatch(repoRequestSearch({ search: newRepo, page: 1, filter: 'star' }));
-  }, [])// eslint-disable-line
+    dispatch(
+      repoRequestSearch({
+        search: newRepo || filters,
+        page: 1,
+        filter: newFilter,
+      })
+    );
+  }, [newFilter]); // eslint-disable-line
 
-  function handleSearchMain(value, page = 1, filter = 'star') {
+  function handleSearchMain(value, page = 1) {
     setNewRepo(value);
-    dispatch(repoRequestSearch({ search: value, page, filter }));
 
-    // console.log(newRepo);
-    // setNewRepo('');
+    dispatch(
+      repoRequestSearch({ search: value || filters, page, filter: newFilter })
+    );
   }
-  // recupera value e trata com delay de 400milessimos
-  // const searchInput = debounce(value => handleSearchMain(value), 400);
 
-  // function handleChange(e) {
-  //   searchInput(e.target.value);
-  // }
+  function hadleFilter(e) {
+    setNewFilter(e.target.value);
+  }
+
   return (
     <Container>
-      <InputSearch
-        // onChange={handleChange}
-        // value={searchInput}
-        handleSearch={handleSearchMain}
-        placeholder="Buscar aluno"
-      />
+      <h1>
+        <FaGithubAlt />
+        Buscar Repositório
+      </h1>
+
+      <Form>
+        <InputSearch
+          handleSearch={handleSearchMain}
+          placeholder="Buscar aluno"
+        />
+
+        <select value={newFilter} onChange={hadleFilter}>
+          <option selected value="stars">
+            stars
+          </option>
+          <option value="forks">forks</option>
+          <option value="issues">issues</option>
+          <option value="updates">updates</option>
+        </select>
+      </Form>
+
+      <h2>{filters}</h2>
       {loading ? (
         <Loading />
       ) : (
           <List>
-            {repository.repository.items.map(repo => (
-              <li key={repo.id}>
-                <img src={repo.owner.avatar_url} alt={repo.owner.login} />
-                <strong>{repo.name}</strong>
-                <span>{repo.description}</span>
-                <div>
-                  <p>
-                    <GoStar size={14} color={colors.primary} />
-                    {repo.stargazers_count}
-                  </p>
-                  <p>
-                    <GoRepoForked size={14} color={colors.primary} />
-                    {repo.forks_count}
-                  </p>
-                  <Link
-                    to={`/pullrequests/${encodeURIComponent(
-                      repo.full_name
-                    )}/pulls`}
-                  // onClick={() => handleAddRequest(repo)}
-                  >
-                    <FiGitPullRequest size={14} color={colors.primary} />
-                  Pull Request
-                </Link>
-                </div>
-              </li>
-            ))}
+            {repositories.repository
+              ? repositories.repository.items.map(repo => (
+                <li key={repo.id}>
+                  <img src={repo.owner.avatar_url} alt={repo.owner.login} />
+                  <strong>{repo.name}</strong>
+                  <span>{repo.description}</span>
+                  <div>
+                    <p>
+                      <GoStar size={14} color={colors.primary} />
+                      {repo.stargazers_count}
+                    </p>
+                    <p>
+                      <GoRepoForked size={14} color={colors.primary} />
+                      {repo.forks_count}
+                    </p>
+                    <Link
+                      to={`/pullrequests/${encodeURIComponent(
+                        repo.full_name
+                      )}/pulls`}
+                    // onClick={() => handleAddRequest(repo)}
+                    >
+                      <FiGitPullRequest size={14} color={colors.primary} />
+                      Pull Request
+                    </Link>
+                  </div>
+                </li>
+              ))
+              : repositories.repository}
           </List>
         )}
     </Container>

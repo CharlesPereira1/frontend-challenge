@@ -1,15 +1,17 @@
 import produce from 'immer';
 
 const INITIAL_STATE = {
-  repos: {
-    filter: 'star',
-    page: 1,
-    data: [],
-    perPage: 10,
-  },
-
-  // repository: {},
+  nameSearch: '',
+  filter: '',
+  page: 1,
+  perPage: 30,
+  qtdResult: 0,
+  plusPage: false,
   loading: false,
+  repos: {
+    data: [],
+  },
+  // repos: [{ repository: [] }],
 };
 
 export default function repo(state = INITIAL_STATE, action) {
@@ -18,18 +20,24 @@ export default function repo(state = INITIAL_STATE, action) {
       case '@repo/REPO_REQUEST_SEARCH': {
         // draft.params = action.repo.data;
         draft.loading = true;
+        draft.nameSearch = draft.search;
         break;
       }
 
       // recupera dados do request (map)
       case '@repo/REPO_SEARCH_SUCCESS': {
         draft.repos = action.payload.data;
+        draft.nameSearch = action.search;
         draft.loading = false;
         break;
       }
 
       case '@repo/REPO_FAILURE': {
         draft.loading = false;
+        break;
+      }
+
+      case '@repo/REPO_NEXT_PAGE': {
         break;
       }
 

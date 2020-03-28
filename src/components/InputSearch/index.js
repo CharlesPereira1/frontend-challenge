@@ -2,30 +2,20 @@ import React from 'react';
 import { MdSearch } from 'react-icons/md';
 
 import { debounce } from 'lodash';
-import PropsTypes from 'prop-types';
 
-import { Container, Search } from './styles';
+// import { Container, Search } from './styles';
 
-export default function InputSearch({ handleSearch, timeDebounce, ...rest }) {
-  const search = debounce(value => handleSearch(value), timeDebounce);
+export default function InputSearch({ handleSearch, ...rest }) {
+  const search = debounce(value => handleSearch(value), 400);
 
   function handleChange(e) {
     search(e.target.value);
   }
 
   return (
-    <Container>
+    <>
       <MdSearch size={24} />
-      <Search onChange={handleChange} />
-    </Container>
+      <input onChange={handleChange} {...rest} />
+    </>
   );
 }
-
-InputSearch.defaultProps = {
-  timeDebounce: 3500,
-};
-
-InputSearch.PropsTypes = {
-  handleSearch: PropsTypes.func.isRequired,
-  timeDebounce: PropsTypes.number,
-};

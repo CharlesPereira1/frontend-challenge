@@ -14,13 +14,6 @@ export function repoSearchSuccess(data) {
   };
 }
 
-export function repoInRequest(data) {
-  return {
-    type: '@repo/REPO_NEXT_PAGE',
-    payload: { data },
-  };
-}
-
 export function repoLoading(data) {
   return {
     type: '@repo/REPO_LOADING',
@@ -31,5 +24,12 @@ export function repoLoading(data) {
 export function repoFaiure() {
   return {
     type: '@repo/REPO_FAILURE',
+  };
+}
+
+export function repoNextPage(data) {
+  return {
+    type: '@repo/REPO_NEXT_PAGE',
+    payload: { data },
   };
 }
