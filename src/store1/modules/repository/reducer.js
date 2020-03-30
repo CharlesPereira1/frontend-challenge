@@ -4,13 +4,11 @@ const INITIAL_STATE = {
   nameSearch: '',
   filter: '',
   page: 1,
-  perPage: 30,
+  perPage: 10,
   qtdResult: 0,
   plusPage: false,
   loading: false,
-  repos: {
-    data: [],
-  },
+  repos: [],
   // repos: [{ repository: [] }],
 };
 
@@ -20,14 +18,16 @@ export default function repo(state = INITIAL_STATE, action) {
       case '@repo/REPO_REQUEST_SEARCH': {
         // draft.params = action.repo.data;
         draft.loading = true;
-        draft.nameSearch = draft.search;
+        // draft.nameSearch = draft.search;
+        draft.filter = action.payload.filter;
         break;
       }
 
       // recupera dados do request (map)
       case '@repo/REPO_SEARCH_SUCCESS': {
         draft.repos = action.payload.data;
-        draft.nameSearch = action.search;
+        draft.nameSearch = action.payload.nameSearch;
+        draft.filter = action.payload.filter;
         draft.loading = false;
         break;
       }
@@ -37,9 +37,19 @@ export default function repo(state = INITIAL_STATE, action) {
         break;
       }
 
-      case '@repo/REPO_NEXT_PAGE': {
+      case '@repo/REPO_REQUEST_NEXT_PAGE': {
+        draft.repos = [...state];
+        draft.plusPage = true;
         break;
       }
+
+      case '@repo/REPO_NEXT_PAGE': {
+        draft.repos = [...state, action.payload.data];
+        draft.plusPage = false;
+        break;
+      }
+
+      // [...state, action.payload.data] //pega os dados e adiciona mais
 
       default:
         return state;

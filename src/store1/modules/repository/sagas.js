@@ -2,7 +2,7 @@ import { all, takeLatest, call, put, delay } from 'redux-saga/effects';
 
 import api from '~/services/api';
 
-import { repoSearchSuccess, repoFaiure } from './actions';
+import { repoSearchSuccess, repoFaiure, repoNextPage } from './actions';
 
 /**
  * takeLastest - toda vez que ouvir o type do action irá executar uma função
@@ -10,26 +10,54 @@ import { repoSearchSuccess, repoFaiure } from './actions';
  *
  */
 
-export function* searchinRepo({ payload }) {
+export function* searchinRepo({ payload, nameSearch, filter }) {
   try {
     const { search, page, filter } = payload.data;
+    let { nameSearch } = payload;
 
     const res = yield call(api.get, 'search/repositories', {
       params: {
         q: search,
         sort: filter || 'stars', // 'stars',
         page,
-        per_page: 30,
+        per_page: 10,
         order: 'desc',
       },
     });
     yield delay(500);
-    const nameSearch = search;
-    const repository = res.data;
+    nameSearch = search;
+    const filterActual = filter;
+    const repos = res.data;
+    console.log(nameSearch);
+    console.log(filterActual);
 
-    yield put(repoSearchSuccess({ repository, nameSearch }));
+    yield put(repoSearchSuccess(repos, nameSearch, filterActual));
   } catch (error) {
     // console.log('Erro pesquisar repositório!');
+    yield put(repoFaiure());
+  }
+}
+
+export function* nextPage({ payload }) {
+  try {
+    const { search, page, filter } = payload.data;
+    let { nameSearch } = payload;
+
+    const res = yield call(api.get, 'search/repositories', {
+      params: {
+        q: search,
+        sort: filter || 'stars', // 'stars',
+        page: page + 1,
+        per_page: 10,
+        order: 'desc',
+      },
+    });
+    yield delay(500);
+    nameSearch = search;
+    const repos = res.data;
+    const filterActual = filter;
+    yield put(repoNextPage(repos));
+  } catch (error) {
     yield put(repoFaiure());
   }
 }
@@ -38,4 +66,7 @@ export function* searchinRepo({ payload }) {
 //   const {page, perPage, qtdResult, plusPage } = payload.data;
 
 // }
-export default all([takeLatest('@repo/REPO_REQUEST_SEARCH', searchinRepo)]);
+export default all([
+  takeLatest('@repo/REPO_REQUEST_SEARCH', searchinRepo),
+  takeLatest('@repo/REPO_NEXT_PAGE', nextPage),
+]);

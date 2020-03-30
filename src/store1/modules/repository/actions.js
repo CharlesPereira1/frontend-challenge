@@ -1,16 +1,16 @@
 // faz requisição na API
-export function repoRequestSearch(data) {
+export function repoRequestSearch(data, nameSearch, filter) {
   return {
     type: '@repo/REPO_REQUEST_SEARCH',
-    payload: { data },
+    payload: { data, nameSearch, filter },
   };
 }
 
 // Mostra em tela
-export function repoSearchSuccess(data) {
+export function repoSearchSuccess(data, nameSearch, filter) {
   return {
     type: '@repo/REPO_SEARCH_SUCCESS',
-    payload: { data },
+    payload: { data, nameSearch, filter },
   };
 }
 

@@ -8,7 +8,10 @@ import { Link } from 'react-router-dom';
 import Container from '~/components/Container';
 import InputSearch from '~/components/InputSearch';
 import Loading from '~/components/Loading';
-import { repoRequestSearch } from '~/store1/modules/repository/actions';
+import {
+  repoRequestSearch,
+  repoNextPage,
+} from '~/store1/modules/repository/actions';
 
 // import api from '~/services/api';
 import { colors } from '~/styles/colors';
@@ -16,13 +19,25 @@ import { colors } from '~/styles/colors';
 import { Form, SubmitButton, List } from './styles';
 
 export default function Repository() {
+  const dispatch = useDispatch();
+  const repositories = useSelector(state => state.repository.repos.items);
+  const loading = useSelector(state => state.repository.loading);
+  const filters = useSelector(state => state.repository.nameSearch);
+  const pages = useSelector(state => state.repository);
+
   const [newRepo, setNewRepo] = useState('');
   const [newFilter, setNewFilter] = useState('');
 
-  const dispatch = useDispatch();
-  const repositories = useSelector(state => state.repository.repos);
-  const loading = useSelector(state => state.repository.loading);
-  const filters = useSelector(state => state.repository.repos.nameSearch);
+  const [pageActual, setPageActual] = useState(pages.page); // page atual
+  const [totalPage, setTotalPage] = useState(
+    repositories ? pages.repos.total_count : null
+  ); // total page
+  const [postPage, setPostPage] = useState(pages.perPage); // total por page
+
+  console.log(pageActual);
+  console.log(totalPage);
+  console.log(postPage);
+  console.log(newFilter);
 
   useEffect(() => {
     dispatch(
@@ -34,7 +49,7 @@ export default function Repository() {
     );
   }, [newFilter]); // eslint-disable-line
 
-  function handleSearchMain(value, page = 1) {
+  function handleSearchMain(value, page = 1, filter) {
     setNewRepo(value);
 
     dispatch(
@@ -45,6 +60,33 @@ export default function Repository() {
   function hadleFilter(e) {
     setNewFilter(e.target.value);
   }
+
+  useEffect(() => {
+    dispatch(
+      repoRequestSearch({
+        search: newRepo || filters,
+        page: pageActual,
+        filter: newFilter,
+      })
+    );
+  }, [pageActual]);
+
+  function handleScroll() {
+    if (
+      window.innerHeight + document.documentElement.scrollTop <
+      document.documentElement.offsetHeight ||
+      pageActual === totalPage ||
+      loading
+    ) {
+      return;
+    }
+
+    setPageActual(pageActual);
+  }
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <Container>
@@ -74,8 +116,8 @@ export default function Repository() {
         <Loading />
       ) : (
           <List>
-            {repositories.repository
-              ? repositories.repository.items.map(repo => (
+            {repositories
+              ? repositories.map(repo => (
                 <li key={repo.id}>
                   <img src={repo.owner.avatar_url} alt={repo.owner.login} />
                   <strong>{repo.name}</strong>
@@ -100,7 +142,7 @@ export default function Repository() {
                   </div>
                 </li>
               ))
-              : repositories.repository}
+              : null}
           </List>
         )}
     </Container>
