@@ -38,7 +38,7 @@ export default function repo(state = INITIAL_STATE, action) {
       }
 
       case '@repo/REPO_REQUEST_NEXT_PAGE': {
-        draft.repos = [...state];
+        draft.repos = [...state, action.payload.data];
         draft.plusPage = true;
         break;
       }
@@ -46,6 +46,7 @@ export default function repo(state = INITIAL_STATE, action) {
       case '@repo/REPO_NEXT_PAGE': {
         draft.repos = [...state, action.payload.data];
         draft.plusPage = false;
+        draft.page = action.payload.page + 1;
         break;
       }
 

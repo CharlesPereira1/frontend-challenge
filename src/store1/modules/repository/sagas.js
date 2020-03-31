@@ -20,7 +20,7 @@ export function* searchinRepo({ payload, nameSearch, filter }) {
         q: search,
         sort: filter || 'stars', // 'stars',
         page,
-        per_page: 10,
+        per_page: 5,
         order: 'desc',
       },
     });
@@ -40,6 +40,7 @@ export function* searchinRepo({ payload, nameSearch, filter }) {
 
 export function* nextPage({ payload }) {
   try {
+    // aplicar o selector do sagas aqui //
     const { search, page, filter } = payload.data;
     let { nameSearch } = payload;
 
@@ -47,8 +48,8 @@ export function* nextPage({ payload }) {
       params: {
         q: search,
         sort: filter || 'stars', // 'stars',
-        page: page + 1,
-        per_page: 10,
+        page: 1,
+        per_page: 5,
         order: 'desc',
       },
     });

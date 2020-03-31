@@ -27,7 +27,7 @@ export function repoFaiure() {
   };
 }
 
-export function repoNextPage(data) {
+export function repoNextPage(data, page) {
   return {
     type: '@repo/REPO_NEXT_PAGE',
     payload: { data },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaGithubAlt } from 'react-icons/fa';
 import { FiGitPullRequest } from 'react-icons/fi';
 import { GoRepoForked, GoStar } from 'react-icons/go';
@@ -19,17 +19,14 @@ import { colors } from '~/styles/colors';
 import { Form, SubmitButton, List } from './styles';
 
 export default function Repository() {
-  const scrollObserver = useRef();
   const dispatch = useDispatch();
   const repositories = useSelector(state => state.repository.repos.items);
   const loading = useSelector(state => state.repository.loading);
   const filters = useSelector(state => state.repository.nameSearch);
   const pages = useSelector(state => state.repository);
-  const [page, setPage] = useState(1);
 
   const [newRepo, setNewRepo] = useState('');
   const [newFilter, setNewFilter] = useState('');
-  const [scrollradio, setScrollRadio] = useState(null);
 
   const [pageActual, setPageActual] = useState(pages.page); // page atual
   const [totalPage, setTotalPage] = useState(
@@ -38,7 +35,6 @@ export default function Repository() {
   const [postPage, setPostPage] = useState(pages.perPage); // total por page
 
   console.log(pageActual);
-  console.log(page);
   console.log(totalPage);
   console.log(postPage);
   console.log(newFilter);
@@ -47,53 +43,19 @@ export default function Repository() {
     dispatch(
       repoRequestSearch({
         search: newRepo || filters,
-        page,
+        page: 1,
         filter: newFilter,
       })
     );
   }, [newFilter]); // eslint-disable-line
 
-  function handleSearchMain(value, page, filter) {
+  function handleSearchMain(value, page = 1, filter) {
     setNewRepo(value);
 
     dispatch(
-      repoRequestSearch({
-        search: value || filters,
-        page,
-        filter: newFilter,
-      })
+      repoRequestSearch({ search: value || filters, page, filter: newFilter })
     );
   }
-
-  /**
-   * Scroll infinito
-   */
-  const intersectionObserver = new IntersectionObserver(entries => {
-    const radio = entries[0].intersectionRatio;
-    setScrollRadio(radio);
-  });
-
-  useEffect(() => {
-    intersectionObserver.observe(scrollObserver.current);
-    return () => {
-      intersectionObserver.disconnect();
-    };
-  }, []);
-
-  // Assim que mudar o valor de 0 p/ 1 na variavel scroolradio o useeffect irá executar
-  useEffect(() => {
-    console.log('Executando o efeito scrollRadio');
-    if (scrollradio > 0) {
-      dispatch(
-        repoRequestSearch({
-          search: newRepo || filters,
-          page: page + 1,
-          filter: newFilter,
-        })
-      );
-    }
-  }, [scrollradio]); // eslint-disable-line
-  console.log(page);
 
   function hadleFilter(e) {
     setNewFilter(e.target.value);
@@ -108,19 +70,23 @@ export default function Repository() {
       })
     );
   }, [pageActual]);
-  /**
-   * Scroll infinito
-   */
-  // const repositories = () => {
 
-  // }
+  function handleScroll() {
+    if (
+      window.innerHeight + document.documentElement.scrollTop <
+        document.documentElement.offsetHeight ||
+      pageActual === totalPage ||
+      loading
+    ) {
+      return;
+    }
 
-  //   setPageActual(pageActual);
-  // }
-  // useEffect(() => {
-  //   window.addEventListener('scroll', handleScroll);
-  //   return () => window.removeEventListener('scroll', handleScroll);
-  // }, []);
+    setPageActual(pageActual);
+  }
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <Container>
@@ -146,7 +112,6 @@ export default function Repository() {
       </Form>
 
       <h2>{filters}</h2>
-      {scrollradio}
       {loading ? (
         <Loading />
       ) : (
@@ -179,8 +144,6 @@ export default function Repository() {
             ))}
         </List>
       )}
-      {scrollradio}
-      <div ref={scrollObserver} />
     </Container>
   );
 }
