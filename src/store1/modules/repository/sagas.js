@@ -1,8 +1,8 @@
-import { all, takeLatest, call, put, delay } from 'redux-saga/effects';
+import { all, takeLatest, call, put, delay, select } from 'redux-saga/effects';
 
 import api from '~/services/api';
 
-import { repoSearchSuccess, repoFaiure, repoNextPage } from './actions';
+import { repoSearchSuccess, repoFailure, repoNextPage } from './actions';
 
 /**
  * takeLastest - toda vez que ouvir o type do action irá executar uma função
@@ -10,64 +10,64 @@ import { repoSearchSuccess, repoFaiure, repoNextPage } from './actions';
  *
  */
 
-export function* searchinRepo({ payload, nameSearch, filter }) {
+export function* searchinRepo({ payload }) {
   try {
-    const { search, page, filter } = payload.data;
-    let { nameSearch } = payload;
+    // cria os parametros a serem passados para o action
+    const { search = 'javascript', page, filter, perPage } = payload.data;
 
+    // define os parametros no link da api
     const res = yield call(api.get, 'search/repositories', {
       params: {
         q: search,
         sort: filter || 'stars', // 'stars',
         page,
-        per_page: 5,
+        per_page: perPage,
         order: 'desc',
       },
     });
-    yield delay(500);
-    nameSearch = search;
-    const filterActual = filter;
-    const repos = res.data;
-    console.log(nameSearch);
-    console.log(filterActual);
+    // delay de 2ms
+    yield delay(2000);
 
-    yield put(repoSearchSuccess(repos, nameSearch, filterActual));
+    // const filterActual = filter;
+    const repos = res.data;
+
+    // passa os parametros para o action vindos no repository.js
+    yield put(repoSearchSuccess(repos, search, filter, page, perPage));
   } catch (error) {
-    // console.log('Erro pesquisar repositório!');
-    yield put(repoFaiure());
+    yield put(repoFailure());
   }
 }
 
-export function* nextPage({ payload }) {
+export function* nextPageRepo({ payload }) {
   try {
-    // aplicar o selector do sagas aqui //
-    const { search, page, filter } = payload.data;
-    let { nameSearch } = payload;
+    const { search = 'javascript', page, filter, perPage } = payload.data;
 
+    // define os parametros no link da api
     const res = yield call(api.get, 'search/repositories', {
       params: {
         q: search,
         sort: filter || 'stars', // 'stars',
-        page: 1,
-        per_page: 5,
+        page,
+        per_page: perPage,
         order: 'desc',
       },
     });
-    yield delay(500);
-    nameSearch = search;
+    // delay de 2ms
+    yield delay(1000);
+
+    // const filterActual = filter;
     const repos = res.data;
-    const filterActual = filter;
-    yield put(repoNextPage(repos));
+
+    // passa os parametros para o action vindos no repository.js
+    yield put(repoNextPage(repos, search, filter, page, perPage));
   } catch (error) {
-    yield put(repoFaiure());
+    yield put(repoFailure());
   }
+
+  // export function* listaInfinita({payload}) {
+  //   const {page, perPage, qtdResult, plusPage } = payload.data;
 }
-
-// export function* listaInfinita({payload}) {
-//   const {page, perPage, qtdResult, plusPage } = payload.data;
-
-// }
 export default all([
   takeLatest('@repo/REPO_REQUEST_SEARCH', searchinRepo),
-  takeLatest('@repo/REPO_NEXT_PAGE', nextPage),
+  takeLatest('@repo/REPO_REQUEST_NEXT_PAGE', nextPageRepo),
 ]);

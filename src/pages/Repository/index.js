@@ -10,7 +10,7 @@ import InputSearch from '~/components/InputSearch';
 import Loading from '~/components/Loading';
 import {
   repoRequestSearch,
-  repoNextPage,
+  repoSearchSuccess,
 } from '~/store1/modules/repository/actions';
 
 // import api from '~/services/api';
@@ -23,104 +23,92 @@ export default function Repository() {
   const dispatch = useDispatch();
   const repositories = useSelector(state => state.repository.repos.items);
   const loading = useSelector(state => state.repository.loading);
-  const filters = useSelector(state => state.repository.nameSearch);
-  const pages = useSelector(state => state.repository);
-  const [page, setPage] = useState(1);
+  const filters = useSelector(state => state.repository.search);
 
-  const [newRepo, setNewRepo] = useState('');
+  // const page = useSelector(state => state.repository.page);
+
+  const [search, setSearch] = useState('');
   const [newFilter, setNewFilter] = useState('');
-  const [scrollradio, setScrollRadio] = useState(null);
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(10);
+  const [scrollRadio, setScrollRadio] = useState(null);
 
-  const [pageActual, setPageActual] = useState(pages.page); // page atual
-  const [totalPage, setTotalPage] = useState(
-    repositories && pages.repos.total_count
-  ); // total page
-  const [postPage, setPostPage] = useState(pages.perPage); // total por page
+  // recupera dados do input
+  function handleSearchMain(value) {
+    setSearch(value);
+  }
 
-  console.log(pageActual);
-  console.log(page);
-  console.log(totalPage);
-  console.log(postPage);
-  console.log(newFilter);
-
+  // quando o nome do input mudar dispara a ação dos parametros
   useEffect(() => {
     dispatch(
       repoRequestSearch({
-        search: newRepo || filters,
+        search: search || filters,
         page,
-        filter: newFilter,
+        filter: newFilter || 'forks',
+        perPage,
       })
     );
-  }, [newFilter]); // eslint-disable-line
-
-  function handleSearchMain(value, page, filter) {
-    setNewRepo(value);
-
-    dispatch(
-      repoRequestSearch({
-        search: value || filters,
-        page,
-        filter: newFilter,
-      })
-    );
-  }
+  }, [search]); // eslint-disable-line
 
   /**
    * Scroll infinito
    */
+  // função utilizando o intersection para verificar se a pagina foi toda lida
+  // inicia com valor zero se nao foi lida e no fim traz valor 1 para lida
   const intersectionObserver = new IntersectionObserver(entries => {
     const radio = entries[0].intersectionRatio;
     setScrollRadio(radio);
   });
-
+  // faz um disconnect depois de lida para voltar ao estado de zero novamente
   useEffect(() => {
     intersectionObserver.observe(scrollObserver.current);
     return () => {
       intersectionObserver.disconnect();
     };
-  }, []);
+  }, []); // eslint-disable-line
+  console.log(scrollRadio);
 
-  // Assim que mudar o valor de 0 p/ 1 na variavel scroolradio o useeffect irá executar
   useEffect(() => {
-    console.log('Executando o efeito scrollRadio');
-    if (scrollradio > 0) {
+    if (scrollRadio > 0) {
+      const newPage = page + 1;
+      setPage(newPage);
       dispatch(
         repoRequestSearch({
-          search: newRepo || filters,
-          page: page + 1,
-          filter: newFilter,
+          search: search || filters,
+          page,
+          filter: newFilter || 'forks',
+          perPage,
         })
       );
+      // dispatch(repoSearchSuccess(page));
     }
-  }, [scrollradio]); // eslint-disable-line
+  }, [scrollRadio]);
   console.log(page);
 
-  function hadleFilter(e) {
-    setNewFilter(e.target.value);
-  }
-
-  useEffect(() => {
-    dispatch(
-      repoRequestSearch({
-        search: newRepo || filters,
-        page: pageActual,
-        filter: newFilter,
-      })
-    );
-  }, [pageActual]);
-  /**
-   * Scroll infinito
-   */
-  // const repositories = () => {
-
-  // }
-
-  //   setPageActual(pageActual);
-  // }
+  // Assim que mudar o valor de 0 p/ 1 na variavel scroolradio o useeffect irá executar
   // useEffect(() => {
-  //   window.addEventListener('scroll', handleScroll);
-  //   return () => window.removeEventListener('scroll', handleScroll);
-  // }, []);
+  //   console.log('Executando o efeito scrollRadio');
+  //   if (scrollradio > 0) {
+  //     dispatch(
+  //       repoRequestSearch({
+  //         page: page + 1,
+  //       })
+  //     );
+  //   }
+  // }, [scrollradio]); // eslint-disable-line
+  // console.log(page);
+
+  // function hadleFilter(e) {
+  //   setNewFilter(e.target.value);
+  // }
+
+  // useEffect(() => {
+  //   dispatch(
+  //     repoRequestSearch({
+  //       filter: newFilter || 'forks',
+  //     })
+  //   );
+  // }, [page]); // eslint-disable-line
 
   return (
     <Container>
@@ -135,51 +123,51 @@ export default function Repository() {
           placeholder="Buscar aluno"
         />
 
-        <select value={newFilter} onChange={hadleFilter}>
+        {/* <select value={newFilter} onChange={hadleFilter}>
           <option selected value="stars">
             stars
           </option>
           <option value="forks">forks</option>
           <option value="issues">issues</option>
           <option value="updates">updates</option>
-        </select>
+        </select> */}
       </Form>
 
       <h2>{filters}</h2>
-      {scrollradio}
+      {scrollRadio}
       {loading ? (
         <Loading />
       ) : (
-        <List>
-          {repositories &&
-            repositories.map(repo => (
-              <li key={repo.id}>
-                <img src={repo.owner.avatar_url} alt={repo.owner.login} />
-                <strong>{repo.name}</strong>
-                <span>{repo.description}</span>
-                <div>
-                  <p>
-                    <GoStar size={14} color={colors.primary} />
-                    {repo.stargazers_count}
-                  </p>
-                  <p>
-                    <GoRepoForked size={14} color={colors.primary} />
-                    {repo.forks_count}
-                  </p>
-                  <Link
-                    to={`/pullrequests/${encodeURIComponent(
-                      repo.full_name
-                    )}/pulls`}
-                  >
-                    <FiGitPullRequest size={14} color={colors.primary} />
+          <List>
+            {repositories &&
+              repositories.map(repo => (
+                <li key={repo.id}>
+                  <img src={repo.owner.avatar_url} alt={repo.owner.login} />
+                  <strong>{repo.name}</strong>
+                  <span>{repo.description}</span>
+                  <div>
+                    <p>
+                      <GoStar size={14} color={colors.primary} />
+                      {repo.stargazers_count}
+                    </p>
+                    <p>
+                      <GoRepoForked size={14} color={colors.primary} />
+                      {repo.forks_count}
+                    </p>
+                    <Link
+                      to={`/pullrequests/${encodeURIComponent(
+                        repo.full_name
+                      )}/pulls`}
+                    >
+                      <FiGitPullRequest size={14} color={colors.primary} />
                     Pull Request
                   </Link>
-                </div>
-              </li>
-            ))}
-        </List>
-      )}
-      {scrollradio}
+                  </div>
+                </li>
+              ))}
+          </List>
+        )}
+      {scrollRadio}
       <div ref={scrollObserver} />
     </Container>
   );

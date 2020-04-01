@@ -1,35 +1,35 @@
 // faz requisição na API
-export function repoRequestSearch(data, nameSearch, filter) {
+export function repoRequestSearch(data, search, filter, page, perPage) {
   return {
     type: '@repo/REPO_REQUEST_SEARCH',
-    payload: { data, nameSearch, filter },
+    payload: { data, search, filter, page, perPage },
   };
 }
 
 // Mostra em tela
-export function repoSearchSuccess(data, nameSearch, filter) {
+export function repoSearchSuccess(data, search, filter, page, perPage) {
   return {
     type: '@repo/REPO_SEARCH_SUCCESS',
-    payload: { data, nameSearch, filter },
+    payload: { data, search, filter, page, perPage },
   };
 }
 
-export function repoLoading(data) {
+export function repoRequestNextPage(data, page) {
   return {
-    type: '@repo/REPO_LOADING',
-    payload: { data },
-  };
-}
-
-export function repoFaiure() {
-  return {
-    type: '@repo/REPO_FAILURE',
+    type: '@repo/REPO_REQUEST_NEXT_PAGE',
+    payload: { data, page },
   };
 }
 
 export function repoNextPage(data, page) {
   return {
     type: '@repo/REPO_NEXT_PAGE',
-    payload: { data },
+    payload: { data, page },
+  };
+}
+
+export function repoFailure() {
+  return {
+    type: '@repo/REPO_FAILURE',
   };
 }
