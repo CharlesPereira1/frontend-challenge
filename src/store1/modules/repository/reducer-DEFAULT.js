@@ -33,45 +33,23 @@ export default function repo(state = INITIAL_STATE, action) {
       }
 
       case '@repo/REPO_REQUEST_NEXT_PAGE': {
-        // draft.repos = [action.payload.data];
-
-        // if (draft.page >= 1) {
+        draft.repos = [action.payload.data];
         draft.plusPage = true;
-        // }
-        // draft.page = action.payload.page + 1;
         break;
       }
 
-      case '@repo/REPO_NEXT_PAGE_SUCCESS': {
-        // const { items } = action.payload.data;
-        // draft.repos.items.push(items);
-        // return
-        // state.push({
-        //   items: [action.payload.data.items],
-        draft.plusPage = true;
-        draft.Page = action.payload.data;
-        //   plusPage: false,
-        // });
-        // draft[action.payload.data.items] = action.payload.data.items;
-        // const { newRepos } = action.payload.data;
-        draft.repos = [draft.repos, action.payload.data];
-        // draft.repos = [...state, ...newRepos];
-
-        // action.payload.data.forEach(data => {
-        //   draft[data] = action.data.page;
-        // });
-
-        // action.payload.data.forEach(data => {
-        //   draft.repos = { data };
-        // });
-
-        // draft.repos.push(action.payload.data);
-
-        // draft.push(action.payload.data);
-        // break;
+      case '@repo/REPO_NEXT_PAGE': {
+        const totalPage =
+          action.payload.data.total_count / action.payload.perPage;
+        draft.repos = [action.payload.data];
+        draft.plusPage = false;
+        if (totalPage <= draft.page) {
+          // [...state, action.payload.page],
+        }
+        // draft.push({ ...action.payload.data.items });
+        break;
       }
 
-      // eslint-disable-next-line no-fallthrough
       case '@repo/REPO_FAILURE': {
         draft.loading = false;
         break;

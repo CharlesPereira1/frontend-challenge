@@ -10,6 +10,7 @@ import InputSearch from '~/components/InputSearch';
 import Loading from '~/components/Loading';
 import {
   repoRequestSearch,
+  repoRequestNextPage,
   repoSearchSuccess,
 } from '~/store1/modules/repository/actions';
 
@@ -24,6 +25,8 @@ export default function Repository() {
   const repositories = useSelector(state => state.repository.repos.items);
   const loading = useSelector(state => state.repository.loading);
   const filters = useSelector(state => state.repository.search);
+  const teste = useSelector(state => state.repository);
+  console.log(teste);
 
   // const page = useSelector(state => state.repository.page);
 
@@ -44,7 +47,7 @@ export default function Repository() {
       repoRequestSearch({
         search: search || filters,
         page,
-        filter: newFilter || 'forks',
+        filter: newFilter || 'forks1',
         perPage,
       })
     );
@@ -73,11 +76,11 @@ export default function Repository() {
       const newPage = page + 1;
       setPage(newPage);
       dispatch(
-        repoRequestSearch({
+        repoRequestNextPage({
           search: search || filters,
           page,
           filter: newFilter || 'forks',
-          perPage,
+          perPage: 4,
         })
       );
       // dispatch(repoSearchSuccess(page));
@@ -138,35 +141,35 @@ export default function Repository() {
       {loading ? (
         <Loading />
       ) : (
-          <List>
-            {repositories &&
-              repositories.map(repo => (
-                <li key={repo.id}>
-                  <img src={repo.owner.avatar_url} alt={repo.owner.login} />
-                  <strong>{repo.name}</strong>
-                  <span>{repo.description}</span>
-                  <div>
-                    <p>
-                      <GoStar size={14} color={colors.primary} />
-                      {repo.stargazers_count}
-                    </p>
-                    <p>
-                      <GoRepoForked size={14} color={colors.primary} />
-                      {repo.forks_count}
-                    </p>
-                    <Link
-                      to={`/pullrequests/${encodeURIComponent(
-                        repo.full_name
-                      )}/pulls`}
-                    >
-                      <FiGitPullRequest size={14} color={colors.primary} />
+        <List>
+          {repositories &&
+            repositories.map(repo => (
+              <li key={repo.id}>
+                <img src={repo.owner.avatar_url} alt={repo.owner.login} />
+                <strong>{repo.name}</strong>
+                <span>{repo.description}</span>
+                <div>
+                  <p>
+                    <GoStar size={14} color={colors.primary} />
+                    {repo.stargazers_count}
+                  </p>
+                  <p>
+                    <GoRepoForked size={14} color={colors.primary} />
+                    {repo.forks_count}
+                  </p>
+                  <Link
+                    to={`/pullrequests/${encodeURIComponent(
+                      repo.full_name
+                    )}/pulls`}
+                  >
+                    <FiGitPullRequest size={14} color={colors.primary} />
                     Pull Request
                   </Link>
-                  </div>
-                </li>
-              ))}
-          </List>
-        )}
+                </div>
+              </li>
+            ))}
+        </List>
+      )}
       {scrollRadio}
       <div ref={scrollObserver} />
     </Container>

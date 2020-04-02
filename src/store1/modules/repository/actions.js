@@ -21,9 +21,9 @@ export function repoRequestNextPage(data, page) {
   };
 }
 
-export function repoNextPage(data, page) {
+export function repoNextPageSuccess(data, page) {
   return {
-    type: '@repo/REPO_NEXT_PAGE',
+    type: '@repo/REPO_NEXT_PAGE_SUCCESS',
     payload: { data, page },
   };
 }
